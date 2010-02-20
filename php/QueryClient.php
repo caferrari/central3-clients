@@ -74,10 +74,17 @@ class QueryClient
 	private function loadUrl($url)
 	{
 		$cache = $this->cache_dir . md5($url);
+		
+		// se o arquvio de cache existir
 		if (file_exists($cache))
 		{
+			// Se o tempo de vida do cache estiver aceitavel retorna os dados
 			$age = date('U') - filemtime($cache);
 			if ($age < 300) return unserialize(file_get_contents($cache));
+
+			// Senão define o horario de criação para agora, para impedir multiplas tentativas de criação do cache
+			// e cria o cache novamente
+			else touch($cache);
 		}
 		
 		// Tanta carregar um novo recordset
@@ -87,7 +94,6 @@ class QueryClient
 
 		// se o webservice retornou o codigo de sucesso, cria um novo cache e retorna a informação!
 		if (curl_getinfo($ch, CURLINFO_HTTP_CODE) === 200){
-			@unlink($cache);
 			file_put_contents($cache, $res);
 			return unserialize($res);
 		}
