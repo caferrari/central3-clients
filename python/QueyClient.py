@@ -1,10 +1,5 @@
-import sys
-import tempfile
-import urllib
+import sys, tempfile, urllib, os, hashlib
 from json import JSONDecoder
-import os
-import hashlib
-import io
 
 class QueryClient:
 	"""Classe para carregar dados do webservice do Governo do Tocantins"""
