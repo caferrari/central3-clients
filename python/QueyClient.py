@@ -41,20 +41,20 @@ class QueryClient:
 			
 			return JSONDecoder().decode(content)
 			
-		return False
+		raise Exception('Erro ao obter arquivo')
 
 	def query(self, acao, pars=''):
 		url = "http://web.secom.to.gov.br/central3/rpc/%s?formato=json&site=%s&%s" % (acao, self.site, pars)
 		dic = self.loadUrl(url)
 		if dic['status'] == 0:
-			return False
+			raise Exception(dic['error_desc'])
 		return dic
 		
 	def byUri(self, uri):
 		url = "http://web.secom.to.gov.br/central3/rpc/?formato=json&site=%s&uri=%s" % (self.site, uri)
 		dic = self.loadUrl(url)
 		if dic['status'] == 0:
-			return False
+			raise Exception(dic['error_desc'])
 		return dic
 
 if __name__ == "__main__":		
