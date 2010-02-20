@@ -74,25 +74,33 @@ class QueryClient
 	private function loadUrl($url)
 	{
 		$cache = $this->cache_dir . md5($url);
-
 		if (file_exists($cache))
 		{
 			$age = date('U') - filemtime($cache);
-			if ($age < 300)
-				return unserialize(file_get_contents($cache));
-			else
-				@unlink($cache);
+			if ($age < 300) return unserialize(file_get_contents($cache));
 		}
 		
+		// Tanta carregar um novo recordset
 		$ch = curl_init($url);
 		curl_setopt ($ch, CURLOPT_RETURNTRANSFER, 1) ;
 		$res = curl_exec ($ch);
 
-		if ($res){
+		// se o webservice retornou o codigo de sucesso, cria um novo cache e retorna a informação!
+		if (curl_getinfo($ch, CURLINFO_HTTP_CODE) === 200){
+			@unlink($cache);
 			file_put_contents($cache, $res);
 			return unserialize($res);
 		}
 
+		// Caso a requisição falhou, muda a data de criacao do cache para agora, e este será o atual
+		// até dar o timeout e uma nova tentativa no webservice
+		if (file_exists($cache))
+		{
+			touch($cache);
+			return unserialize(file_get_contents($cache));
+		}
+		
+		// Se o cache nao existir e a requisição falhar, uma exception é lançada
 		throw new Exception(curl_error($ch));
 	}
 
